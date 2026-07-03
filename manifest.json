@@ -36,13 +36,6 @@
     }
   ],
 
-  "web_accessible_resources": [
-    {
-      "resources": ["content/content.css"],
-      "matches": ["<all_urls>"]
-    }
-  ],
-
-  "permissions": ["storage", "webRequest", "webRequestBlocking", "webNavigation"],
+  "permissions": ["storage", "webNavigation", "bookmarks"],
   "host_permissions": ["<all_urls>"]
 }

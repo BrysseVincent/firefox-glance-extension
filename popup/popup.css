@@ -108,8 +108,9 @@ h1 {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 20px;
+  min-width: 20px;
   height: 20px;
+  padding: 0 4px;
   border-radius: 5px;
   background: #2a2b32;
   font-size: 11px;
