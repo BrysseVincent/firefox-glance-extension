@@ -61,6 +61,17 @@
     true
   );
 
+  document.addEventListener(
+    "keydown",
+    (event) => {
+      if (event.key !== "Escape" || !hostEl) return;
+      event.preventDefault();
+      event.stopPropagation();
+      closePreview();
+    },
+    true
+  );
+
   async function openPreview(url) {
     if (!panelEl) {
       await buildPanel();
