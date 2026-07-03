@@ -1,0 +1,116 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  width: 260px;
+  margin: 0;
+  padding: 14px 16px 16px;
+  font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+  background: #1e1f24;
+  color: #e6e6e9;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.logo {
+  font-size: 18px;
+  color: #5a96ff;
+}
+
+h1 {
+  font-size: 15px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 13px;
+  padding: 8px 0;
+  cursor: pointer;
+}
+
+.toggle-row input {
+  display: none;
+}
+
+.toggle-switch {
+  position: relative;
+  width: 34px;
+  height: 20px;
+  background: #3a3b42;
+  border-radius: 999px;
+  transition: background 0.15s ease;
+  flex-shrink: 0;
+}
+
+.toggle-switch::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #c7c8cd;
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+
+.toggle-row input:checked + .toggle-switch {
+  background: #5a96ff;
+}
+
+.toggle-row input:checked + .toggle-switch::after {
+  transform: translateX(14px);
+  background: #fff;
+}
+
+.hint {
+  font-size: 12px;
+  line-height: 1.5;
+  color: #a5a6ac;
+  margin: 6px 0 12px;
+}
+
+.hint kbd {
+  background: #3a3b42;
+  border-radius: 4px;
+  padding: 1px 5px;
+  font-size: 11px;
+  font-family: inherit;
+}
+
+.legend {
+  list-style: none;
+  margin: 0;
+  padding: 10px 0 0;
+  border-top: 1px solid #33343b;
+  font-size: 12px;
+  color: #c7c8cd;
+}
+
+.legend li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 0;
+}
+
+.legend-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 5px;
+  background: #2a2b32;
+  font-size: 11px;
+}

@@ -1,0 +1,33 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Glance</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <header class="header">
+      <span class="logo">◐</span>
+      <h1>Glance</h1>
+    </header>
+
+    <label class="toggle-row" for="enabled-toggle">
+      <span>Enable Alt+Click preview</span>
+      <input type="checkbox" id="enabled-toggle" />
+      <span class="toggle-switch"></span>
+    </label>
+
+    <p class="hint">
+      Hold <kbd>Alt</kbd> and click any link to open it in a floating preview
+      instead of leaving the page.
+    </p>
+
+    <ul class="legend">
+      <li><span class="legend-icon">✕</span> Close the preview</li>
+      <li><span class="legend-icon">→</span> Expand into a full tab</li>
+      <li><span class="legend-icon">‖</span> Toggle split-screen view</li>
+    </ul>
+
+    <script src="popup.js"></script>
+  </body>
+</html>
