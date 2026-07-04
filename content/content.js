@@ -145,16 +145,6 @@
     }
   `;
 
-  let enabled = true;
-  browser.storage.local.get({ glimpseEnabled: true }).then((res) => {
-    enabled = res.glimpseEnabled;
-  });
-  browser.storage.onChanged.addListener((changes, area) => {
-    if (area === "local" && changes.glimpseEnabled) {
-      enabled = changes.glimpseEnabled.newValue;
-    }
-  });
-
   let isPreview = false; // set once the background tells us we're the preview tab
   let overlayEl = null; // dim layer shown on the origin page while a preview is open
   let overlayArmAt = 0; // ignore the mouseup/click that opened the preview
@@ -179,7 +169,6 @@
   document.addEventListener(
     "click",
     (event) => {
-      if (!enabled) return;
       if (!event.altKey || event.button !== 0) return;
 
       const anchor = event.target.closest && event.target.closest("a[href]");
