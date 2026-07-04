@@ -51,4 +51,4 @@ This project is a simple browser extension built with:
 
 ## License
 
-This project is licensed under the MIT License. See the LICENSE file for details.
+This project is licensed under the Mozilla Public License 2.0. See the LICENSE file for details.
