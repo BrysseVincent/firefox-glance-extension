@@ -36,6 +36,6 @@
     }
   ],
 
-  "permissions": ["storage", "webNavigation", "bookmarks"],
+  "permissions": ["storage", "webNavigation", "bookmarks", "clipboardWrite"],
   "host_permissions": ["<all_urls>"]
 }

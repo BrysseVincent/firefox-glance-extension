@@ -7,6 +7,14 @@
       '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>',
     bookmark:
       '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>',
+    back:
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>',
+    forward:
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>',
+    copy:
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>',
+    check:
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>',
   };
 
   const CONTROLS_CSS = `
@@ -54,6 +62,13 @@
     }
     .glance-btn-active svg {
       fill: currentColor;
+    }
+    .glance-btn-copied {
+      background: rgba(70, 170, 110, 0.55);
+      color: #ffffff;
+    }
+    .glance-bar-gap {
+      height: 4px;
     }
     .glance-dialog-backdrop {
       position: fixed;
@@ -146,6 +161,8 @@
   let controlsRoot = null;
   let controlsShadow = null;
   let bookmarkBtn = null;
+  let copyBtn = null;
+  let copyResetTimer = null;
   let dialogEls = null; // { backdrop, dialog } while the bookmark dialog is open
 
   function isPreviewableLink(anchor) {
@@ -270,12 +287,17 @@
     const bar = document.createElement("div");
     bar.className = "glance-bar";
 
+    const backBtn = makeButton("glance-btn-back", ICONS.back, "Go back", () => history.back());
+    const forwardBtn = makeButton("glance-btn-forward", ICONS.forward, "Go forward", () => history.forward());
+    const gap = document.createElement("div");
+    gap.className = "glance-bar-gap";
+    copyBtn = makeButton("glance-btn-copy", ICONS.copy, "Copy link", onCopyClick);
     bookmarkBtn = makeButton("glance-btn-bookmark", ICONS.bookmark, "Bookmark this page", onBookmarkClick);
     const expandBtn = makeButton("glance-btn-expand", ICONS.expand, "Open in new tab", () =>
       browser.runtime.sendMessage({ type: "glance:promote" })
     );
 
-    bar.append(bookmarkBtn, expandBtn);
+    bar.append(backBtn, forwardBtn, gap, copyBtn, bookmarkBtn, expandBtn);
     controlsShadow.append(style, bar);
     document.documentElement.appendChild(controlsRoot);
 
@@ -285,16 +307,50 @@
   function hideControls() {
     isPreview = false;
     closeBookmarkDialog();
+    if (copyResetTimer) {
+      clearTimeout(copyResetTimer);
+      copyResetTimer = null;
+    }
     if (controlsRoot) {
       controlsRoot.remove();
       controlsRoot = null;
       controlsShadow = null;
       bookmarkBtn = null;
+      copyBtn = null;
     }
   }
 
   function setBookmarkState(active) {
     if (bookmarkBtn) bookmarkBtn.classList.toggle("glance-btn-active", !!active);
+  }
+
+  // ---------- Copy link
+
+  async function onCopyClick() {
+    const url = location.href;
+    try {
+      await navigator.clipboard.writeText(url);
+    } catch (err) {
+      // clipboard API can be denied on some pages; fall back to execCommand
+      const ta = document.createElement("textarea");
+      ta.value = url;
+      ta.style.position = "fixed";
+      ta.style.opacity = "0";
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand("copy");
+      ta.remove();
+    }
+    if (!copyBtn) return;
+    copyBtn.innerHTML = ICONS.check;
+    copyBtn.classList.add("glance-btn-copied");
+    if (copyResetTimer) clearTimeout(copyResetTimer);
+    copyResetTimer = setTimeout(() => {
+      copyResetTimer = null;
+      if (!copyBtn) return;
+      copyBtn.innerHTML = ICONS.copy;
+      copyBtn.classList.remove("glance-btn-copied");
+    }, 1200);
   }
 
   // ---------- Bookmark dialog (Firefox's native star panel isn't reachable
