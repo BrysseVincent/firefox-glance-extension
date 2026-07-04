@@ -1,6 +1,6 @@
 (() => {
-  if (window.__glanceInjected) return;
-  window.__glanceInjected = true;
+  if (window.__glimpseInjected) return;
+  window.__glimpseInjected = true;
 
   const ICONS = {
     expand:
@@ -18,7 +18,7 @@
   };
 
   const CONTROLS_CSS = `
-    .glance-bar {
+    .glimpse-bar {
       pointer-events: auto;
       display: flex;
       flex-direction: column;
@@ -26,7 +26,7 @@
       gap: 8px;
       transform: translateY(-50%);
     }
-    .glance-btn {
+    .glimpse-btn {
       appearance: none;
       border: none;
       background: rgba(30, 31, 36, 0.92);
@@ -44,38 +44,38 @@
       -webkit-backdrop-filter: blur(6px);
       transition: background-color 0.15s ease, color 0.15s ease, transform 0.08s ease;
     }
-    .glance-btn svg {
+    .glimpse-btn svg {
       width: 16px;
       height: 16px;
       pointer-events: none;
     }
-    .glance-btn:hover {
+    .glimpse-btn:hover {
       background: rgba(60, 62, 70, 0.95);
       color: #ffffff;
     }
-    .glance-btn:active {
+    .glimpse-btn:active {
       transform: scale(0.9);
     }
-    .glance-btn-active {
+    .glimpse-btn-active {
       background: rgba(90, 150, 255, 0.45);
       color: #ffffff;
     }
-    .glance-btn-active svg {
+    .glimpse-btn-active svg {
       fill: currentColor;
     }
-    .glance-btn-copied {
+    .glimpse-btn-copied {
       background: rgba(70, 170, 110, 0.55);
       color: #ffffff;
     }
-    .glance-bar-gap {
+    .glimpse-bar-gap {
       height: 4px;
     }
-    .glance-dialog-backdrop {
+    .glimpse-dialog-backdrop {
       position: fixed;
       inset: 0;
       pointer-events: auto;
     }
-    .glance-dialog {
+    .glimpse-dialog {
       pointer-events: auto;
       position: fixed;
       top: 50%;
@@ -93,18 +93,18 @@
       font: 13px -apple-system, "Segoe UI", Roboto, sans-serif;
       color: #e6e6e9;
     }
-    .glance-dialog h3 {
+    .glimpse-dialog h3 {
       margin: 0 0 2px;
       font-size: 13px;
       font-weight: 600;
       text-align: center;
     }
-    .glance-dialog label {
+    .glimpse-dialog label {
       font-size: 11px;
       color: #a5a6ac;
     }
-    .glance-dialog input,
-    .glance-dialog select {
+    .glimpse-dialog input,
+    .glimpse-dialog select {
       width: 100%;
       box-sizing: border-box;
       background: #1e1f24;
@@ -114,44 +114,44 @@
       color: #e6e6e9;
       font: inherit;
     }
-    .glance-dialog input:focus,
-    .glance-dialog select:focus {
+    .glimpse-dialog input:focus,
+    .glimpse-dialog select:focus {
       outline: none;
       border-color: #5a96ff;
     }
-    .glance-dialog-actions {
+    .glimpse-dialog-actions {
       display: flex;
       justify-content: flex-end;
       gap: 6px;
       margin-top: 4px;
     }
-    .glance-dialog-btn {
+    .glimpse-dialog-btn {
       border: none;
       border-radius: 6px;
       padding: 6px 12px;
       font: inherit;
       cursor: pointer;
     }
-    .glance-dialog-btn:hover {
+    .glimpse-dialog-btn:hover {
       filter: brightness(1.15);
     }
-    .glance-dialog-cancel {
+    .glimpse-dialog-cancel {
       background: #3a3b42;
       color: #e6e6e9;
     }
-    .glance-dialog-save {
+    .glimpse-dialog-save {
       background: #5a96ff;
       color: #fff;
     }
   `;
 
   let enabled = true;
-  browser.storage.local.get({ glanceEnabled: true }).then((res) => {
-    enabled = res.glanceEnabled;
+  browser.storage.local.get({ glimpseEnabled: true }).then((res) => {
+    enabled = res.glimpseEnabled;
   });
   browser.storage.onChanged.addListener((changes, area) => {
-    if (area === "local" && changes.glanceEnabled) {
-      enabled = changes.glanceEnabled.newValue;
+    if (area === "local" && changes.glimpseEnabled) {
+      enabled = changes.glimpseEnabled.newValue;
     }
   });
 
@@ -188,7 +188,7 @@
       event.preventDefault();
       event.stopPropagation();
       browser.runtime.sendMessage({
-        type: "glance:open",
+        type: "glimpse:open",
         url: anchor.href,
         screen: {
           availLeft: window.screen.availLeft || 0,
@@ -214,7 +214,7 @@
       if (!overlayEl && !isPreview) return;
       event.preventDefault();
       event.stopPropagation();
-      browser.runtime.sendMessage({ type: "glance:close" });
+      browser.runtime.sendMessage({ type: "glimpse:close" });
     },
     true
   );
@@ -224,7 +224,7 @@
   function addOverlay() {
     if (overlayEl) return;
     overlayEl = document.createElement("div");
-    overlayEl.id = "glance-origin-overlay";
+    overlayEl.id = "glimpse-origin-overlay";
     Object.assign(overlayEl.style, {
       position: "fixed",
       inset: "0",
@@ -241,7 +241,7 @@
     }, 800);
     overlayEl.addEventListener("click", () => {
       if (performance.now() < overlayArmAt) return;
-      browser.runtime.sendMessage({ type: "glance:close" });
+      browser.runtime.sendMessage({ type: "glimpse:close" });
     });
   }
 
@@ -255,7 +255,7 @@
 
   function makeButton(className, iconSvg, title, handler) {
     const btn = document.createElement("button");
-    btn.className = `glance-btn ${className}`;
+    btn.className = `glimpse-btn ${className}`;
     btn.innerHTML = iconSvg;
     btn.title = title;
     btn.type = "button";
@@ -285,16 +285,16 @@
     style.textContent = CONTROLS_CSS;
 
     const bar = document.createElement("div");
-    bar.className = "glance-bar";
+    bar.className = "glimpse-bar";
 
-    const backBtn = makeButton("glance-btn-back", ICONS.back, "Go back", () => history.back());
-    const forwardBtn = makeButton("glance-btn-forward", ICONS.forward, "Go forward", () => history.forward());
+    const backBtn = makeButton("glimpse-btn-back", ICONS.back, "Go back", () => history.back());
+    const forwardBtn = makeButton("glimpse-btn-forward", ICONS.forward, "Go forward", () => history.forward());
     const gap = document.createElement("div");
-    gap.className = "glance-bar-gap";
-    copyBtn = makeButton("glance-btn-copy", ICONS.copy, "Copy link", onCopyClick);
-    bookmarkBtn = makeButton("glance-btn-bookmark", ICONS.bookmark, "Bookmark this page", onBookmarkClick);
-    const expandBtn = makeButton("glance-btn-expand", ICONS.expand, "Open in new tab", () =>
-      browser.runtime.sendMessage({ type: "glance:promote" })
+    gap.className = "glimpse-bar-gap";
+    copyBtn = makeButton("glimpse-btn-copy", ICONS.copy, "Copy link", onCopyClick);
+    bookmarkBtn = makeButton("glimpse-btn-bookmark", ICONS.bookmark, "Bookmark this page", onBookmarkClick);
+    const expandBtn = makeButton("glimpse-btn-expand", ICONS.expand, "Open in new tab", () =>
+      browser.runtime.sendMessage({ type: "glimpse:promote" })
     );
 
     bar.append(backBtn, forwardBtn, gap, copyBtn, bookmarkBtn, expandBtn);
@@ -321,7 +321,7 @@
   }
 
   function setBookmarkState(active) {
-    if (bookmarkBtn) bookmarkBtn.classList.toggle("glance-btn-active", !!active);
+    if (bookmarkBtn) bookmarkBtn.classList.toggle("glimpse-btn-active", !!active);
   }
 
   // ---------- Copy link
@@ -343,13 +343,13 @@
     }
     if (!copyBtn) return;
     copyBtn.innerHTML = ICONS.check;
-    copyBtn.classList.add("glance-btn-copied");
+    copyBtn.classList.add("glimpse-btn-copied");
     if (copyResetTimer) clearTimeout(copyResetTimer);
     copyResetTimer = setTimeout(() => {
       copyResetTimer = null;
       if (!copyBtn) return;
       copyBtn.innerHTML = ICONS.copy;
-      copyBtn.classList.remove("glance-btn-copied");
+      copyBtn.classList.remove("glimpse-btn-copied");
     }, 1200);
   }
 
@@ -361,23 +361,23 @@
       closeBookmarkDialog();
       return;
     }
-    if (bookmarkBtn.classList.contains("glance-btn-active")) {
-      const res = await browser.runtime.sendMessage({ type: "glance:bookmark-remove" });
+    if (bookmarkBtn.classList.contains("glimpse-btn-active")) {
+      const res = await browser.runtime.sendMessage({ type: "glimpse:bookmark-remove" });
       setBookmarkState(res && res.bookmarked);
       return;
     }
-    const info = await browser.runtime.sendMessage({ type: "glance:bookmark-info" });
+    const info = await browser.runtime.sendMessage({ type: "glimpse:bookmark-info" });
     if (!info) return;
     openBookmarkDialog(info);
   }
 
   function openBookmarkDialog(info) {
     const backdrop = document.createElement("div");
-    backdrop.className = "glance-dialog-backdrop";
+    backdrop.className = "glimpse-dialog-backdrop";
     backdrop.addEventListener("click", closeBookmarkDialog);
 
     const dialog = document.createElement("div");
-    dialog.className = "glance-dialog";
+    dialog.className = "glimpse-dialog";
 
     const heading = document.createElement("h3");
     heading.textContent = "Bookmark this page";
@@ -400,21 +400,21 @@
     }
 
     const actions = document.createElement("div");
-    actions.className = "glance-dialog-actions";
+    actions.className = "glimpse-dialog-actions";
 
     const cancelBtn = document.createElement("button");
     cancelBtn.type = "button";
-    cancelBtn.className = "glance-dialog-btn glance-dialog-cancel";
+    cancelBtn.className = "glimpse-dialog-btn glimpse-dialog-cancel";
     cancelBtn.textContent = "Cancel";
     cancelBtn.addEventListener("click", closeBookmarkDialog);
 
     const saveBtn = document.createElement("button");
     saveBtn.type = "button";
-    saveBtn.className = "glance-dialog-btn glance-dialog-save";
+    saveBtn.className = "glimpse-dialog-btn glimpse-dialog-save";
     saveBtn.textContent = "Save";
     const save = async () => {
       const res = await browser.runtime.sendMessage({
-        type: "glance:bookmark-create",
+        type: "glimpse:bookmark-create",
         title: nameInput.value.trim(),
         parentId: folderSelect.value,
       });
@@ -445,16 +445,16 @@
 
   browser.runtime.onMessage.addListener((message) => {
     switch (message.type) {
-      case "glance:add-overlay":
+      case "glimpse:add-overlay":
         addOverlay();
         break;
-      case "glance:remove-overlay":
+      case "glimpse:remove-overlay":
         removeOverlay();
         break;
-      case "glance:show-controls":
+      case "glimpse:show-controls":
         showControls(message.bookmarked);
         break;
-      case "glance:hide-controls":
+      case "glimpse:hide-controls":
         hideControls();
         break;
     }

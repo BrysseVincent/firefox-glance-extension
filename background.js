@@ -1,4 +1,4 @@
-// Glance previews are real popup windows (browser.windows.create type:"popup"),
+// Glimpse previews are real popup windows (browser.windows.create type:"popup"),
 // not iframes. A popup window is a top-level browsing context, so
 // X-Frame-Options / CSP frame-ancestors never apply — every site renders.
 // The slim popup chrome makes it look and feel like a floating panel.
@@ -22,8 +22,8 @@ function sleep(ms) {
 // ---------- Remembered popup geometry
 
 async function getSavedBounds() {
-  const { glanceBounds } = await browser.storage.local.get("glanceBounds");
-  return glanceBounds || null;
+  const { glimpseBounds } = await browser.storage.local.get("glimpseBounds");
+  return glimpseBounds || null;
 }
 
 function defaultBounds() {
@@ -48,7 +48,7 @@ function startBoundsPolling() {
       const signature = JSON.stringify(bounds);
       if (signature !== lastBoundsSignature) {
         lastBoundsSignature = signature;
-        await browser.storage.local.set({ glanceBounds: bounds });
+        await browser.storage.local.set({ glimpseBounds: bounds });
       }
     } catch (err) {
       // window may be mid-close
@@ -78,7 +78,7 @@ async function showControlsSoon() {
   const bookmarked = await isPreviewBookmarked();
   for (let i = 0; i < 24; i++) {
     if (!previewTabId) return;
-    if (await sendToTab(previewTabId, { type: "glance:show-controls", bookmarked })) return;
+    if (await sendToTab(previewTabId, { type: "glimpse:show-controls", bookmarked })) return;
     await sleep(150);
   }
 }
@@ -123,10 +123,10 @@ async function getBookmarkInfo() {
   const tree = await browser.bookmarks.getTree();
   const folders = flattenFolders(tree[0].children || [], 0, []);
 
-  const { glanceBookmarkFolder } = await browser.storage.local.get("glanceBookmarkFolder");
+  const { glimpseBookmarkFolder } = await browser.storage.local.get("glimpseBookmarkFolder");
   const defaultFolderId =
-    glanceBookmarkFolder && folders.some((f) => f.id === glanceBookmarkFolder)
-      ? glanceBookmarkFolder
+    glimpseBookmarkFolder && folders.some((f) => f.id === glimpseBookmarkFolder)
+      ? glimpseBookmarkFolder
       : "unfiled_____"; // "Other Bookmarks"
 
   return {
@@ -142,7 +142,7 @@ async function createBookmark(title, parentId) {
   if (!tab || !tab.url) return { bookmarked: false };
   try {
     await browser.bookmarks.create({ title: title || tab.title || tab.url, url: tab.url, parentId });
-    await browser.storage.local.set({ glanceBookmarkFolder: parentId });
+    await browser.storage.local.set({ glimpseBookmarkFolder: parentId });
     return { bookmarked: true };
   } catch (err) {
     return { bookmarked: false };
@@ -176,7 +176,7 @@ async function openPreview(url, sender) {
   if (previewWindowId !== null) {
     // Reuse the existing popup; move the dim overlay if the origin changed.
     if (originTabId !== null && originTabId !== newOriginTabId) {
-      await sendToTab(originTabId, { type: "glance:remove-overlay" });
+      await sendToTab(originTabId, { type: "glimpse:remove-overlay" });
     }
     originTabId = newOriginTabId;
     originWindowId = newOriginWindowId;
@@ -189,7 +189,7 @@ async function openPreview(url, sender) {
     const w = await browser.windows.create({
       url,
       type: "popup",
-      titlePreface: "Glance — ",
+      titlePreface: "Glimpse — ",
       left: bounds.left,
       top: bounds.top,
       width: bounds.width,
@@ -208,14 +208,14 @@ async function openPreview(url, sender) {
   previewOpenedAt = Date.now();
   showControlsSoon();
   if (originTabId !== null) {
-    await sendToTab(originTabId, { type: "glance:add-overlay" });
+    await sendToTab(originTabId, { type: "glimpse:add-overlay" });
   }
 }
 
 async function cleanup({ closeWindow }) {
   stopBoundsPolling();
   if (originTabId !== null) {
-    await sendToTab(originTabId, { type: "glance:remove-overlay" });
+    await sendToTab(originTabId, { type: "glimpse:remove-overlay" });
   }
   if (closeWindow && previewWindowId !== null) {
     try {
@@ -239,7 +239,7 @@ async function closePreview() {
 async function promoteToTab() {
   if (previewTabId === null || originWindowId === null) return;
   try {
-    await sendToTab(previewTabId, { type: "glance:hide-controls" });
+    await sendToTab(previewTabId, { type: "glimpse:hide-controls" });
     const moved = await browser.tabs.move(previewTabId, { windowId: originWindowId, index: -1 });
     const movedId = Array.isArray(moved) ? moved[0].id : moved.id;
     previewTabId = null; // the tab now belongs to the main window; don't close it with the popup
@@ -256,18 +256,18 @@ async function promoteToTab() {
 
 browser.runtime.onMessage.addListener((message, sender) => {
   switch (message.type) {
-    case "glance:open":
+    case "glimpse:open":
       if (message.screen) screenInfo = message.screen;
       return openPreview(message.url, sender);
-    case "glance:close":
+    case "glimpse:close":
       return closePreview();
-    case "glance:promote":
+    case "glimpse:promote":
       return promoteToTab();
-    case "glance:bookmark-info":
+    case "glimpse:bookmark-info":
       return getBookmarkInfo();
-    case "glance:bookmark-create":
+    case "glimpse:bookmark-create":
       return createBookmark(message.title, message.parentId);
-    case "glance:bookmark-remove":
+    case "glimpse:bookmark-remove":
       return removeBookmark();
   }
 });

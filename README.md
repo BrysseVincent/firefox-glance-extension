@@ -1,6 +1,6 @@
-# Glance for Firefox
+# Glimpse for Firefox
 
-Glance is a lightweight Firefox extension that lets you preview links in a floating split-screen panel without leaving the page. Hold Alt and click any eligible link to open it in a compact preview, then close it, expand it to a full tab, or switch to split view when you want to compare content side by side.
+Glimpse is a lightweight Firefox extension that lets you preview links in a floating split-screen panel without leaving the page. Hold Alt and click any eligible link to open it in a compact preview, then close it, expand it to a full tab, or switch to split view when you want to compare content side by side.
 
 ## Features
 

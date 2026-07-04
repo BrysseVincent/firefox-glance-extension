@@ -1,12 +1,12 @@
 {
   "manifest_version": 3,
-  "name": "Glance",
+  "name": "Glimpse",
   "version": "1.0.0",
   "description": "Alt+click a link to preview it in a floating split-screen panel instead of leaving the page.",
 
   "browser_specific_settings": {
     "gecko": {
-      "id": "glance@brysse.dev",
+      "id": "glimpse@brysse.dev",
       "strict_min_version": "109.0"
     }
   },
@@ -17,7 +17,7 @@
   },
 
   "action": {
-    "default_title": "Glance",
+    "default_title": "Glimpse",
     "default_popup": "popup/popup.html",
     "default_icon": {
       "48": "icons/icon.svg"
