@@ -2,20 +2,51 @@
   if (window.__glimpseInjected) return;
   window.__glimpseInjected = true;
 
+  // Icons are built with createElementNS instead of innerHTML so AMO's
+  // "unsafe assignment to innerHTML" validation passes.
   const ICONS = {
-    expand:
-      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>',
-    bookmark:
-      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>',
-    back:
-      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>',
-    forward:
-      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>',
-    copy:
-      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>',
-    check:
-      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>',
+    expand: [
+      ["path", { d: "M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" }],
+      ["polyline", { points: "15 3 21 3 21 9" }],
+      ["line", { x1: "10", y1: "14", x2: "21", y2: "3" }],
+    ],
+    bookmark: [
+      ["polygon", { points: "12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" }],
+    ],
+    back: [
+      ["line", { x1: "19", y1: "12", x2: "5", y2: "12" }],
+      ["polyline", { points: "12 19 5 12 12 5" }],
+    ],
+    forward: [
+      ["line", { x1: "5", y1: "12", x2: "19", y2: "12" }],
+      ["polyline", { points: "12 5 19 12 12 19" }],
+    ],
+    copy: [
+      ["path", { d: "M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" }],
+      ["path", { d: "M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" }],
+    ],
+    check: [["polyline", { points: "20 6 9 17 4 12" }]],
   };
+
+  const SVG_NS = "http://www.w3.org/2000/svg";
+
+  function makeIcon(shapes) {
+    const svg = document.createElementNS(SVG_NS, "svg");
+    svg.setAttribute("viewBox", "0 0 24 24");
+    svg.setAttribute("fill", "none");
+    svg.setAttribute("stroke", "currentColor");
+    svg.setAttribute("stroke-width", "2");
+    svg.setAttribute("stroke-linecap", "round");
+    svg.setAttribute("stroke-linejoin", "round");
+    for (const [tag, attrs] of shapes) {
+      const el = document.createElementNS(SVG_NS, tag);
+      for (const [name, value] of Object.entries(attrs)) {
+        el.setAttribute(name, value);
+      }
+      svg.appendChild(el);
+    }
+    return svg;
+  }
 
   const CONTROLS_CSS = `
     .glimpse-bar {
@@ -279,10 +310,10 @@
 
   // ---------- Preview controls bar
 
-  function makeButton(className, iconSvg, title, handler) {
+  function makeButton(className, iconShapes, title, handler) {
     const btn = document.createElement("button");
     btn.className = `glimpse-btn ${className}`;
-    btn.innerHTML = iconSvg;
+    btn.appendChild(makeIcon(iconShapes));
     btn.title = title;
     btn.type = "button";
     btn.addEventListener("click", handler);
@@ -368,13 +399,13 @@
       ta.remove();
     }
     if (!copyBtn) return;
-    copyBtn.innerHTML = ICONS.check;
+    copyBtn.replaceChildren(makeIcon(ICONS.check));
     copyBtn.classList.add("glimpse-btn-copied");
     if (copyResetTimer) clearTimeout(copyResetTimer);
     copyResetTimer = setTimeout(() => {
       copyResetTimer = null;
       if (!copyBtn) return;
-      copyBtn.innerHTML = ICONS.copy;
+      copyBtn.replaceChildren(makeIcon(ICONS.copy));
       copyBtn.classList.remove("glimpse-btn-copied");
     }, 1200);
   }
